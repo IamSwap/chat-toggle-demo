@@ -18,12 +18,21 @@ class ChatSidebar extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+    // Initialize state based on attribute
+    const initialOpen = this.getAttribute("open") === "true";
+    this.toggleChat(initialOpen);
   }
 
   toggleChat(open) {
     this.isOpen = open;
     const chatSidebar = this.shadowRoot.querySelector(".chat-sidebar");
-    chatSidebar.classList.toggle("open", open);
+
+    if (open) {
+      chatSidebar.style.right = "0";
+    } else {
+      chatSidebar.style.right = "-350px";
+    }
+
     // Dispatch event when state changes
     this.dispatchEvent(
       new CustomEvent("chatToggle", {
@@ -38,6 +47,10 @@ class ChatSidebar extends HTMLElement {
           :host {
               --primary-color: #007bff;
               --hover-color: #0056b3;
+              position: fixed;
+              top: 0;
+              right: 0;
+              z-index: 1000;
           }
 
           .chat-sidebar {
@@ -49,13 +62,8 @@ class ChatSidebar extends HTMLElement {
               background-color: rgba(255, 255, 255, 0.9);
               box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
               transition: right 0.3s ease;
-              z-index: 999;
               display: flex;
               flex-direction: column;
-          }
-
-          .chat-sidebar.open {
-              right: 0;
           }
 
           .chat-header {
@@ -139,6 +147,11 @@ class ChatSidebar extends HTMLElement {
           .chat-input button:hover {
               background-color: var(--hover-color);
           }
+
+          /* Ensure visibility in fullscreen */
+          :host(:fullscreen) {
+              z-index: 9999;
+          }
       `;
 
     const html = `
@@ -163,6 +176,12 @@ class ChatSidebar extends HTMLElement {
     this.shadowRoot.innerHTML = "";
     this.shadowRoot.appendChild(styleSheet);
     this.shadowRoot.innerHTML += html;
+
+    // Set initial state if open attribute exists
+    const initialState = this.getAttribute("open");
+    if (initialState) {
+      this.toggleChat(initialState === "true");
+    }
   }
 
   setupEventListeners() {
@@ -172,7 +191,7 @@ class ChatSidebar extends HTMLElement {
     const chatMessages = this.shadowRoot.querySelector(".chat-messages");
 
     closeButton.addEventListener("click", () => {
-      this.toggleChat(false);
+      this.setAttribute("open", "false");
     });
 
     const addMessage = (message, isSent) => {

@@ -9,11 +9,18 @@
             box-sizing: border-box;
         }
 
-        .video-container {
+        .main-container {
             position: relative;
-            height: 100vh;
             width: 100vw;
+            height: 100vh;
+        }
+
+        .video-container {
+            position: absolute;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
+            z-index: 1;
         }
 
         .video-bg {
@@ -28,13 +35,44 @@
             object-fit: cover;
         }
 
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover .controls {
+            opacity: 1;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Toggle chat button */
         .toggle-button {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.8);
             color: white;
             border: none;
             border-radius: 5px;
@@ -43,7 +81,7 @@
         }
 
         .toggle-button:hover {
-            background-color: #0056b3;
+            background-color: rgba(0, 86, 179, 0.9);
         }
 
         .toggle-button.hidden {
@@ -54,34 +92,100 @@
         chat-sidebar {
             --primary-color: #007bff;
             --hover-color: #0056b3;
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Fullscreen styles */
+        .main-container:fullscreen {
+            background: black;
+        }
+
+        .main-container:fullscreen .toggle-button,
+        .main-container:fullscreen chat-sidebar,
+        .main-container:fullscreen .controls {
+            position: fixed;
         }
     </style>
 </head>
 
 <body>
-    <div class="video-container">
-        <video class="video-bg" autoplay muted loop playsinline>
-            <source src="https://wiki.yoctoproject.org/wiki/images/a/a6/Big-buck-bunny_trailer.webm" type="video/webm">
-            Your browser does not support the video tag.
-        </video>
+    <div class="main-container" id="mainContainer">
+        <div class="video-container">
+            <video class="video-bg" autoplay muted loop playsinline>
+                <source src="https://wiki.yoctoproject.org/wiki/images/a/a6/Big-buck-bunny_trailer.webm"
+                    type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+            <div class="controls">
+                <button class="control-button play-pause">Pause</button>
+                <button class="control-button fullscreen">Fullscreen</button>
+            </div>
+        </div>
+
+        <button class="toggle-button">Toggle Chat</button>
+        <chat-sidebar open="false"></chat-sidebar>
     </div>
 
-    <button class="toggle-button">Toggle Chat</button>
-    <chat-sidebar></chat-sidebar>
-
-    <script src="https://iamswap.github.io/chat-toggle-demo/js/chat.js"></script>
+    <script src="/js/chat.js"></script>
     <script>
+        const mainContainer = document.getElementById('mainContainer');
         const toggleButton = document.querySelector('.toggle-button');
         const chatSidebar = document.querySelector('chat-sidebar');
+        const video = document.querySelector('.video-bg');
+        const playPauseBtn = document.querySelector('.play-pause');
+        const fullscreenBtn = document.querySelector('.fullscreen');
 
-        // Listen for chat toggle events
+        // Chat functionality
+        let isChatOpen = false;
+
         chatSidebar.addEventListener('chatToggle', (event) => {
-            toggleButton.classList.toggle('hidden', event.detail.isOpen);
+            isChatOpen = event.detail.isOpen;
+            toggleButton.classList.toggle('hidden', isChatOpen);
+            // Make sure chat stays visible in fullscreen
+            if (isChatOpen && document.fullscreenElement) {
+                chatSidebar.style.zIndex = '9999';
+            }
         });
 
-        // Handle toggle button click
         toggleButton.addEventListener('click', () => {
-            chatSidebar.setAttribute('open', 'true');
+            isChatOpen = !isChatOpen;
+            chatSidebar.setAttribute('open', isChatOpen.toString());
+        });
+
+        // Play/Pause
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.textContent = 'Pause';
+            } else {
+                video.pause();
+                playPauseBtn.textContent = 'Play';
+            }
+        });
+
+        // Fullscreen
+        fullscreenBtn.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement) {
+                    await mainContainer.requestFullscreen();
+                    // Ensure chat stays on top if it's open
+                    if (chatSidebar.getAttribute('open') === 'true') {
+                        chatSidebar.style.zIndex = '9999';
+                    }
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.log(`Error handling fullscreen: ${err.message}`);
+            }
+        });
+
+        // Update fullscreen button text
+        document.addEventListener('fullscreenchange', () => {
+            fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
         });
     </script>
 </body>
