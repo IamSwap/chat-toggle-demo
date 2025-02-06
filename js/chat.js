@@ -51,6 +51,14 @@ class ChatSidebar extends HTMLElement {
               top: 0;
               right: 0;
               z-index: 1000;
+              height: 100vh;
+              height: -webkit-fill-available;
+          }
+
+          @supports (-webkit-touch-callout: none) {
+              :host {
+                  height: -webkit-fill-available;
+              }
           }
 
           .chat-sidebar {
@@ -59,11 +67,22 @@ class ChatSidebar extends HTMLElement {
               right: -350px;
               width: 350px;
               height: 100vh;
+              height: -webkit-fill-available;
+              max-height: 100vh;
+              max-height: -webkit-fill-available;
               background-color: rgba(255, 255, 255, 0.9);
               box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
               transition: right 0.3s ease;
               display: flex;
               flex-direction: column;
+          }
+
+          @supports (-webkit-touch-callout: none) {
+              .chat-sidebar {
+                  height: -webkit-fill-available;
+                  min-height: -webkit-fill-available;
+                  max-height: -webkit-fill-available;
+              }
           }
 
           .chat-header {

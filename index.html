@@ -2,6 +2,9 @@
 <html>
 
 <head>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
         * {
             margin: 0;
@@ -13,6 +16,17 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: -webkit-fill-available;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+
+            .main-container,
+            .video-container {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+                max-height: -webkit-fill-available;
+            }
         }
 
         .video-container {
@@ -33,22 +47,37 @@
             left: 50%;
             transform: translate(-50%, -50%);
             object-fit: cover;
+            /* iOS specific */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: none;
+        }
+
+        /* iOS fullscreen styles */
+        .video-bg.ios-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: black;
+            object-fit: contain;
         }
 
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 2;
             display: flex;
             gap: 10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .video-container:hover .controls {
             opacity: 1;
+            /* Changed to always visible for mobile */
         }
 
         .control-button {
@@ -59,13 +88,15 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            /* Make buttons more touchable on mobile */
+            min-width: 44px;
+            min-height: 44px;
         }
 
         .control-button:hover {
             background-color: rgba(0, 0, 0, 0.8);
         }
 
-        /* Toggle chat button */
         .toggle-button {
             position: fixed;
             top: 20px;
@@ -78,6 +109,9 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            /* Make button more touchable on mobile */
+            min-width: 44px;
+            min-height: 44px;
         }
 
         .toggle-button:hover {
@@ -98,15 +132,9 @@
             z-index: 1000;
         }
 
-        /* Fullscreen styles */
-        .main-container:fullscreen {
-            background: black;
-        }
-
-        .main-container:fullscreen .toggle-button,
-        .main-container:fullscreen chat-sidebar,
-        .main-container:fullscreen .controls {
-            position: fixed;
+        /* Hide native video controls but keep them accessible */
+        video::-webkit-media-controls {
+            display: none !important;
         }
     </style>
 </head>
@@ -114,7 +142,7 @@
 <body>
     <div class="main-container" id="mainContainer">
         <div class="video-container">
-            <video class="video-bg" autoplay muted loop playsinline>
+            <video id="videoElement" class="video-bg" autoplay muted loop playsinline webkit-playsinline>
                 <source src="https://wiki.yoctoproject.org/wiki/images/a/a6/Big-buck-bunny_trailer.webm"
                     type="video/webm">
                 Your browser does not support the video tag.
@@ -138,13 +166,15 @@
         const playPauseBtn = document.querySelector('.play-pause');
         const fullscreenBtn = document.querySelector('.fullscreen');
 
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
         // Chat functionality
         let isChatOpen = false;
 
         chatSidebar.addEventListener('chatToggle', (event) => {
             isChatOpen = event.detail.isOpen;
             toggleButton.classList.toggle('hidden', isChatOpen);
-            // Make sure chat stays visible in fullscreen
             if (isChatOpen && document.fullscreenElement) {
                 chatSidebar.style.zIndex = '9999';
             }
@@ -166,27 +196,68 @@
             }
         });
 
-        // Fullscreen
-        fullscreenBtn.addEventListener('click', async () => {
-            try {
-                if (!document.fullscreenElement) {
-                    await mainContainer.requestFullscreen();
-                    // Ensure chat stays on top if it's open
-                    if (chatSidebar.getAttribute('open') === 'true') {
-                        chatSidebar.style.zIndex = '9999';
+        // Fullscreen handling
+        if (isIOS) {
+            // iOS fullscreen handling
+            fullscreenBtn.addEventListener('click', () => {
+                const isFullscreen = video.classList.contains('ios-fullscreen');
+                if (!isFullscreen) {
+                    video.classList.add('ios-fullscreen');
+                    fullscreenBtn.textContent = 'Exit Fullscreen';
+                    // Request landscape orientation if supported
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(() => {
+                            // Ignore if orientation lock fails
+                        });
                     }
                 } else {
-                    await document.exitFullscreen();
+                    video.classList.remove('ios-fullscreen');
+                    fullscreenBtn.textContent = 'Fullscreen';
+                    // Release orientation lock if supported
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
                 }
-            } catch (err) {
-                console.log(`Error handling fullscreen: ${err.message}`);
-            }
+            });
+        } else {
+            // Standard fullscreen handling for other browsers
+            fullscreenBtn.addEventListener('click', async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await mainContainer.requestFullscreen();
+                        if (isChatOpen) {
+                            chatSidebar.style.zIndex = '9999';
+                        }
+                    } else {
+                        await document.exitFullscreen();
+                    }
+                } catch (err) {
+                    console.log(`Error handling fullscreen: ${err.message}`);
+                }
+            });
+        }
+
+        // Update fullscreen button text (for non-iOS)
+        if (!isIOS) {
+            document.addEventListener('fullscreenchange', () => {
+                fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
+            });
+        }
+
+        // Handle orientation change
+        window.addEventListener('orientationchange', () => {
+            // Ensure proper layout after orientation change
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
         });
 
-        // Update fullscreen button text
-        document.addEventListener('fullscreenchange', () => {
-            fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
-        });
+        // Prevent default touchmove behavior to avoid unwanted scrolling
+        document.addEventListener('touchmove', (e) => {
+            if (video.classList.contains('ios-fullscreen')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 
