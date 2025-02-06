@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .video-container {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .video-bg {
+            position: absolute;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        .toggle-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-button:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle-button.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        chat-sidebar {
+            --primary-color: #007bff;
+            --hover-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="video-container">
+        <video class="video-bg" autoplay muted loop playsinline>
+            <source src="https://wiki.yoctoproject.org/wiki/images/a/a6/Big-buck-bunny_trailer.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <button class="toggle-button">Toggle Chat</button>
+    <chat-sidebar></chat-sidebar>
+
+    <script src="/js/chat.js"></script>
+    <script>
+        const toggleButton = document.querySelector('.toggle-button');
+        const chatSidebar = document.querySelector('chat-sidebar');
+
+        // Listen for chat toggle events
+        chatSidebar.addEventListener('chatToggle', (event) => {
+            toggleButton.classList.toggle('hidden', event.detail.isOpen);
+        });
+
+        // Handle toggle button click
+        toggleButton.addEventListener('click', () => {
+            chatSidebar.setAttribute('open', 'true');
+        });
+    </script>
+</body>
+
+</html>
