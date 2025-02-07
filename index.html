@@ -63,6 +63,18 @@
             gap: 10px;
         }
 
+        /* Add iOS fullscreen controls styles */
+        .controls.ios-fullscreen {
+            position: fixed;
+            bottom: 20px;
+            z-index: 10000;
+        }
+
+        .controls.ios-fullscreen .control-button {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: #000;
+        }
+
         .control-button {
             padding: 10px 20px;
             background-color: rgba(0, 0, 0, 0.6);
@@ -195,10 +207,13 @@
         if (isIOS) {
             fullscreenBtn.addEventListener('click', () => {
                 const isFullscreen = video.classList.contains('ios-fullscreen');
+                const controls = document.querySelector('.controls');
+
                 if (!isFullscreen) {
                     video.classList.add('ios-fullscreen');
                     videoContainer.classList.add('fullscreen');
                     toggleButton.classList.add('fullscreen');
+                    controls.classList.add('ios-fullscreen');
                     fullscreenBtn.textContent = 'Exit Fullscreen';
                     if (isChatOpen) {
                         chatSidebar.style.zIndex = '10001';
@@ -213,6 +228,7 @@
                     video.classList.remove('ios-fullscreen');
                     videoContainer.classList.remove('fullscreen');
                     toggleButton.classList.remove('fullscreen');
+                    controls.classList.remove('ios-fullscreen');
                     fullscreenBtn.textContent = 'Fullscreen';
                     // Release orientation lock if supported
                     if (screen.orientation && screen.orientation.unlock) {
