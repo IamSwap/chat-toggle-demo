@@ -240,6 +240,14 @@ class ChatSidebar extends HTMLElement {
         sendButton.click();
       }
     });
+
+    // Add click handler for outside clicks
+    document.addEventListener("click", (e) => {
+      // Check if chat is open and click is outside the component
+      if (this.isOpen && !this.contains(e.target) && !e.target.matches(".toggle-button")) {
+        this.setAttribute("open", "false");
+      }
+    });
   }
 }
 
