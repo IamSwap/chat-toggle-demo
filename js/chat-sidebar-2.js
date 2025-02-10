@@ -185,6 +185,7 @@ class ChatSidebar extends HTMLElement {
       :host(.in-fullscreen) .chat-sidebar {
           background-color: rgba(0, 0, 0, 0.1);
           box-shadow: none;
+          backdrop-filter: none; /* Ensure no blur effect */
       }
 
       :host(.in-fullscreen) .chat-header {
@@ -206,7 +207,7 @@ class ChatSidebar extends HTMLElement {
       /* Fullscreen specific styles */
       :host-context(.fullscreen) .chat-sidebar {
           background-color: rgba(0, 0, 0, 0.1);
-          backdrop-filter: blur(5px);
+          backdrop-filter: none; /* Ensure no blur effect */
       }
 
       :host-context(.fullscreen) .chat-header {
