@@ -355,6 +355,21 @@
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         });
 
+        function enterFullscreen() {
+            if (isIOS) {
+                document.body.style.height = '200vh';
+                document.body.style.paddingBottom = '100px';
+                window.scrollTo(0, 1);
+            }
+        }
+
+        function exitFullscreen() {
+            if (isIOS) {
+                document.body.style.height = '';
+                document.body.style.paddingBottom = '';
+            }
+        }
+
         if (isIOS) {
             fullscreenBtn.addEventListener('click', () => {
                 const isFullscreen = video.classList.contains('ios-fullscreen');
@@ -375,6 +390,7 @@
                     if (screen.orientation && screen.orientation.lock) {
                         screen.orientation.lock('landscape').catch(() => { });
                     }
+                    enterFullscreen();
                 } else {
                     video.classList.remove('ios-fullscreen');
                     videoContainer.classList.remove('fullscreen');
@@ -386,6 +402,7 @@
                     if (screen.orientation && screen.orientation.unlock) {
                         screen.orientation.unlock();
                     }
+                    exitFullscreen();
                 }
             });
         } else {
