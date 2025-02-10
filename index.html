@@ -167,7 +167,7 @@
         <chat-sidebar open="false"></chat-sidebar>
     </div>
 
-    <script src="js/chat-sidebar.js"></script>
+    <script src="js/chat-sidebar-transparent.js"></script>
     <script>
         const mainContainer = document.getElementById('mainContainer');
         const videoContainer = document.querySelector('.video-container');
@@ -212,12 +212,14 @@
                 if (!isFullscreen) {
                     video.classList.add('ios-fullscreen');
                     videoContainer.classList.add('fullscreen');
+                    mainContainer.classList.add('fullscreen');
                     toggleButton.classList.add('fullscreen');
                     controls.classList.add('ios-fullscreen');
                     fullscreenBtn.textContent = 'Exit Fullscreen';
                     if (isChatOpen) {
                         chatSidebar.style.zIndex = '10001';
                     }
+                    chatSidebar.classList.add('in-fullscreen');
                     // Request landscape orientation if supported
                     if (screen.orientation && screen.orientation.lock) {
                         screen.orientation.lock('landscape').catch(() => {
@@ -227,9 +229,11 @@
                 } else {
                     video.classList.remove('ios-fullscreen');
                     videoContainer.classList.remove('fullscreen');
+                    mainContainer.classList.remove('fullscreen');
                     toggleButton.classList.remove('fullscreen');
                     controls.classList.remove('ios-fullscreen');
                     fullscreenBtn.textContent = 'Fullscreen';
+                    chatSidebar.classList.remove('in-fullscreen');
                     // Release orientation lock if supported
                     if (screen.orientation && screen.orientation.unlock) {
                         screen.orientation.unlock();
@@ -242,14 +246,18 @@
                     if (!document.fullscreenElement) {
                         await mainContainer.requestFullscreen();
                         videoContainer.classList.add('fullscreen');
+                        mainContainer.classList.add('fullscreen');
                         toggleButton.classList.add('fullscreen');
                         if (isChatOpen) {
                             chatSidebar.style.zIndex = '10001';
                         }
+                        chatSidebar.classList.add('in-fullscreen');
                     } else {
                         await document.exitFullscreen();
                         videoContainer.classList.remove('fullscreen');
+                        mainContainer.classList.remove('fullscreen');
                         toggleButton.classList.remove('fullscreen');
+                        chatSidebar.classList.remove('in-fullscreen');
                     }
                 } catch (err) {
                     console.log(`Error handling fullscreen: ${err.message}`);
@@ -262,7 +270,9 @@
                 fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
                 if (!document.fullscreenElement) {
                     videoContainer.classList.remove('fullscreen');
+                    mainContainer.classList.remove('fullscreen');
                     toggleButton.classList.remove('fullscreen');
+                    chatSidebar.classList.remove('in-fullscreen');
                 }
             });
         }
