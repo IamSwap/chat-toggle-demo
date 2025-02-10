@@ -232,6 +232,7 @@
         <div class="video-container">
             <video id="videoElement" class="video-bg" playsinline webkit-playsinline
                 poster="https://open.http.mp.streamamg.com/p/3001447/sp/300144700/thumbnail/entry_id/0_dl7op7wd/version/100002/acv/192/width/1008/height/567">
+                <!-- Source will be loaded by HLS.js -->
             </video>
             <div class="video-controls">
                 <button class="play-pause-btn">
@@ -248,11 +249,12 @@
         </div>
 
         <button class="toggle-button">Toggle Chat</button>
-        <chat-sidebar open="false"></chat-sidebar>
+        <!-- Updated chat-sidebar element with is-fullscreen attribute -->
+        <chat-sidebar open="false" is-fullscreen="false"></chat-sidebar>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="js/chat-sidebar-1.js"></script>
+    <script src="js/chat-sidebar-2.js"></script>
     <script>
         const mainContainer = document.getElementById('mainContainer');
         const videoContainer = document.querySelector('.video-container');
@@ -268,7 +270,7 @@
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         // Initialize HLS
-        const streamUrl = 'https://open.http.mp.streamamg.com/p/3001447/sp/300144700/playManifest/entryId/0_dl7op7wd/flavorIds/0_cqdynoil,0_a49e3znz,0_71a29dnh,0_71a29dnh,0_d4w6mfft,0_d4w6mfft,0_p1o9lt05,0_p1o9lt05,0_ybsiphxo/format/applehttp/protocol/https/a.m3u8?ks=ZDUzODMxNjJkY2FiZjgzNzYyY2ZkNGRjMzQ4ZmY0ZmFlZjEwYTgyOXwzMDAxNDQ3OzMwMDE0NDc7MTczOTIwMDUwMDswOzE3MzkyMDAyMDA7Vmlld2VyO3N2aWV3OjBfZGw3b3A3d2Qsc2V0cm9sZTpQTEFZQkFDS19CQVNFX1JPTEUsd2lkZ2V0OjE7Ow==&clientTag=html5:v2.55&uiConfId=30028935';
+        const streamUrl = 'https://open.http.mp.streamamg.com/p/3001447/sp/300144700/playManifest/entryId/0_dl7op7wd/flavorIds/0_cqdynoil,0_a49e3znz,0_71a29dnh,0_71a29dnh,0_d4w6mfft,0_d4w6mfft,0_p1o9lt05,0_p1o9lt05,0_ybsiphxo/format/applehttp/protocol/https/a.m3u8?ks=M2E0MDAzYTMzNGFjMDA4OWE4OGU0MzE0NTJlNGU5YzQ2YjdmN2U5M3wzMDAxNDQ3OzMwMDE0NDc7MTczOTIwMzUwMDswOzE3MzkyMDMyMDA7Vmlld2VyO3N2aWV3OjBfZGw3b3A3d2Qsc2V0cm9sZTpQTEFZQkFDS19CQVNFX1JPTEUsd2lkZ2V0OjE7Ow==&clientTag=html5:v2.55&uiConfId=30028935';
 
         async function initPlayer() {
             try {
@@ -278,14 +280,10 @@
                     hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, function () {
                         console.log('HLS manifest parsed');
-                        // Ensure video is paused initially
                         video.pause();
                     });
-                }
-                // For browsers that natively support HLS (like Safari)
-                else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                     video.src = streamUrl;
-                    // Ensure video is paused initially
                     video.pause();
                 }
             } catch (error) {
@@ -310,27 +308,23 @@
             chatSidebar.setAttribute('open', isChatOpen.toString());
         });
 
-        // Format time in MM:SS
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             seconds = Math.floor(seconds % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
-        // Update progress bar and time display
         function updateProgress() {
             const percent = (video.currentTime / video.duration) * 100;
             progressFilled.style.width = `${percent}%`;
             timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         }
 
-        // Handle progress bar click
         progressBar.addEventListener('click', (e) => {
             const pos = (e.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
             video.currentTime = pos * video.duration;
         });
 
-        // Play/Pause toggle with async/await
         playPauseBtn.addEventListener('click', async () => {
             try {
                 if (video.paused) {
@@ -345,7 +339,6 @@
             }
         });
 
-        // Update play/pause button state
         video.addEventListener('play', () => {
             playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
         });
@@ -354,17 +347,14 @@
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         });
 
-        // Time update events
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', updateProgress);
 
-        // Ensure video starts paused
         video.addEventListener('loadedmetadata', () => {
             video.pause();
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         });
 
-        // Existing fullscreen code modifications
         if (isIOS) {
             fullscreenBtn.addEventListener('click', () => {
                 const isFullscreen = video.classList.contains('ios-fullscreen');
@@ -377,16 +367,13 @@
                     mainContainer.classList.add('fullscreen');
                     toggleButton.classList.add('fullscreen');
                     const controls = document.querySelector('.controls');
-                    controls.classList.add('ios-fullscreen');
+                    if (controls) controls.classList.add('ios-fullscreen');
                     if (isChatOpen) {
                         chatSidebar.style.zIndex = '10001';
                     }
-                    chatSidebar.classList.add('in-fullscreen');
-                    // Request landscape orientation if supported
+                    chatSidebar.setAttribute("is-fullscreen", "true");
                     if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock('landscape').catch(() => {
-                            // Ignore if orientation lock fails
-                        });
+                        screen.orientation.lock('landscape').catch(() => { });
                     }
                 } else {
                     video.classList.remove('ios-fullscreen');
@@ -394,9 +381,8 @@
                     mainContainer.classList.remove('fullscreen');
                     toggleButton.classList.remove('fullscreen');
                     const controls = document.querySelector('.controls');
-                    controls.classList.remove('ios-fullscreen');
-                    chatSidebar.classList.remove('in-fullscreen');
-                    // Release orientation lock if supported
+                    if (controls) controls.classList.remove('ios-fullscreen');
+                    chatSidebar.setAttribute("is-fullscreen", "false");
                     if (screen.orientation && screen.orientation.unlock) {
                         screen.orientation.unlock();
                     }
@@ -414,14 +400,14 @@
                         if (isChatOpen) {
                             chatSidebar.style.zIndex = '10001';
                         }
-                        chatSidebar.classList.add('in-fullscreen');
+                        chatSidebar.setAttribute("is-fullscreen", "true");
                     } else {
                         await document.exitFullscreen();
                         fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
                         videoContainer.classList.remove('fullscreen');
                         mainContainer.classList.remove('fullscreen');
                         toggleButton.classList.remove('fullscreen');
-                        chatSidebar.classList.remove('in-fullscreen');
+                        chatSidebar.setAttribute("is-fullscreen", "false");
                     }
                 } catch (err) {
                     console.log(`Error handling fullscreen: ${err.message}`);
@@ -431,12 +417,14 @@
 
         if (!isIOS) {
             document.addEventListener('fullscreenchange', () => {
-                fullscreenBtn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+                fullscreenBtn.innerHTML = document.fullscreenElement ?
+                    '<i class="fas fa-compress"></i>' :
+                    '<i class="fas fa-expand"></i>';
                 if (!document.fullscreenElement) {
                     videoContainer.classList.remove('fullscreen');
                     mainContainer.classList.remove('fullscreen');
                     toggleButton.classList.remove('fullscreen');
-                    chatSidebar.classList.remove('in-fullscreen');
+                    chatSidebar.setAttribute("is-fullscreen", "false");
                 }
             });
         }
