@@ -42,9 +42,17 @@ class ChatSidebar extends HTMLElement {
     if (!chatSidebar) return;
 
     if (open) {
-      chatSidebar.style.right = "0";
+      if (this.getAttribute("is-fullscreen") === "true") {
+        chatSidebar.style.right = "0";
+      } else {
+        chatSidebar.style.position = "relative";
+        chatSidebar.style.right = "auto";
+        chatSidebar.style.width = "100%";
+      }
     } else {
       chatSidebar.style.right = "-350px";
+      chatSidebar.style.position = "fixed";
+      chatSidebar.style.width = "350px";
     }
 
     // Dispatch an event when state changes
@@ -243,7 +251,7 @@ class ChatSidebar extends HTMLElement {
       }
 
       :host-context(.fullscreen) .message.sent {
-          background-color: rgba(0, 123, 255, 0.8);
+          background-color: rgba(233, 236, 239, 0.6);
       }
 
       :host-context(.fullscreen) .chat-input {

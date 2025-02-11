@@ -172,8 +172,7 @@
         }
 
         .toggle-button.hidden {
-            opacity: 0;
-            visibility: hidden;
+            display: none;
         }
 
         chat-sidebar {
@@ -223,6 +222,14 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .chat-sidebar-inline {
+            position: relative;
+            width: 100%;
+            right: auto;
+            height: auto;
+            max-height: 50vh;
         }
     </style>
 </head>
@@ -306,6 +313,9 @@
         toggleButton.addEventListener('click', () => {
             isChatOpen = !isChatOpen;
             chatSidebar.setAttribute('open', isChatOpen.toString());
+            if (!document.fullscreenElement) {
+                chatSidebar.classList.toggle('chat-sidebar-inline', isChatOpen);
+            }
         });
 
         function formatTime(seconds) {
