@@ -59,8 +59,8 @@ class ChatSidebar extends HTMLElement {
   render() {
     const styles = `
       :host {
-          --primary-color: #007bff;
-          --hover-color: #0056b3;
+          --primary-color: rgba(0, 123, 255, 0.4);
+          --hover-color: rgba(0, 123, 255, 0.8);
           position: fixed;
           top: 0;
           right: 0;
@@ -84,8 +84,8 @@ class ChatSidebar extends HTMLElement {
           height: -webkit-fill-available;
           max-height: 100vh;
           max-height: -webkit-fill-available;
-          background-color: rgba(255, 255, 255, 0.95);
-          box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+          background-color: rgba(0, 0, 0, 0.1);
+          box-shadow: none;
           transition: right 0.3s ease, background-color 0.3s ease;
           display: flex;
           flex-direction: column;
@@ -112,7 +112,7 @@ class ChatSidebar extends HTMLElement {
       .close-button {
           background: none;
           border: none;
-          color: white;
+          color: black;
           cursor: pointer;
           padding: 5px;
           font-size: 1.5rem;
@@ -144,7 +144,7 @@ class ChatSidebar extends HTMLElement {
       }
 
       .message.received {
-          background-color: #e9ecef;
+          background-color: rgba(233, 236, 239, 0.9);
           margin-right: auto;
       }
 
@@ -156,7 +156,6 @@ class ChatSidebar extends HTMLElement {
 
       .chat-input {
           padding: 20px;
-          border-top: 1px solid #dee2e6;
           display: flex;
           gap: 10px;
       }
@@ -164,7 +163,8 @@ class ChatSidebar extends HTMLElement {
       .chat-input input {
           flex-grow: 1;
           padding: 10px;
-          border: 1px solid #dee2e6;
+          border: 1px solid rgba(233, 236, 239, 0.9);
+          background-color: rgba(233, 236, 239, 0.9);
           border-radius: 5px;
       }
 
@@ -179,56 +179,6 @@ class ChatSidebar extends HTMLElement {
 
       .chat-input button:hover {
           background-color: var(--hover-color);
-      }
-
-      /* Make chat transparent when in fullscreen mode */
-      :host(.in-fullscreen) .chat-sidebar {
-          background-color: rgba(0, 0, 0, 0.1);
-          box-shadow: none;
-          backdrop-filter: none; /* Ensure no blur effect */
-      }
-
-      :host(.in-fullscreen) .chat-header {
-          background-color: rgba(0, 0, 0, 0.1);
-      }
-
-      :host(.in-fullscreen) .message.received {
-          background-color: rgba(255, 255, 255, 0.9);
-      }
-
-      :host(.in-fullscreen) .message.sent {
-          background-color: rgba(0, 0, 0, 0.1);
-      }
-
-      :host(.in-fullscreen) .chat-input {
-          background-color: rgba(0, 0, 0, 0.1);
-      }
-
-      /* Fullscreen specific styles */
-      :host-context(.fullscreen) .chat-sidebar {
-          background-color: rgba(0, 0, 0, 0.1);
-          backdrop-filter: none; /* Ensure no blur effect */
-      }
-
-      :host-context(.fullscreen) .chat-header {
-          background-color: rgba(0, 123, 255, 0.8);
-      }
-
-      :host-context(.fullscreen) .message.received {
-          background-color: rgba(233, 236, 239, 0.9);
-      }
-
-      :host-context(.fullscreen) .message.sent {
-          background-color: rgba(0, 123, 255, 0.8);
-      }
-
-      :host-context(.fullscreen) .chat-input {
-          border-top: 1px solid rgba(222, 226, 230, 0.3);
-          background-color: rgba(255, 255, 255, 0.1);
-      }
-
-      :host-context(.fullscreen) .chat-input input {
-          background-color: rgba(255, 255, 255, 0.9);
       }
 
       /* Ensure visibility in fullscreen */
