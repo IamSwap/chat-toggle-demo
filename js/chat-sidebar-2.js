@@ -204,6 +204,30 @@ class ChatSidebar extends HTMLElement {
           background-color: rgba(0, 0, 0, 0.1);
       }
 
+      /* Apply transparent styles to normal mode as well */
+      :host .chat-sidebar {
+          background-color: rgba(0, 0, 0, 0.1);
+          box-shadow: none;
+          backdrop-filter: none; /* Ensure no blur effect */
+      }
+
+      :host .chat-header {
+          background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      :host .message.received {
+          background-color: rgba(255, 255, 255, 0.9);
+      }
+
+      :host .message.sent {
+          background-color: rgba(255, 255, 255, 0.5);
+          color: #000;
+      }
+
+      :host .chat-input {
+          background-color: rgba(0, 0, 0, 0.1);
+      }
+
       /* Fullscreen specific styles */
       :host-context(.fullscreen) .chat-sidebar {
           background-color: rgba(0, 0, 0, 0.1);
